@@ -1,6 +1,7 @@
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn shuffled_indices(len: u32, seed: u32) -> Vec<u32> {
     // Creates a vector of indices from 0 to len-1
     // Essentially a growable array

@@ -55,6 +55,10 @@ Each side displays portraits in a fixed layout:
 ```
 portrait_shuffler/
 │
+├── src-tauri/
+│   ├── src/lib.rs         # Run-state commands exposed to the UI
+│   └── tauri.conf.json    # Desktop window + bundler config
+│
 ├── src/
 │   ├── App.tsx
 │   ├── components/
@@ -69,6 +73,18 @@ portrait_shuffler/
 ├── Cargo.toml             # Rust crate config
 └── src/lib.rs             # Rust shuffle function
 ```
+
+---
+
+## Desktop Shell (Tauri)
+
+This repo now doubles as a desktop app: Tauri wraps the existing React UI, links directly against the Rust shuffle crate, and keeps long-lived Iron Man run state in the backend. That unlocks:
+
+- Shared logic between the browser build and the native shell (no duplicated RNG).
+- IPC commands for starting/resetting runs, marking characters complete, and sharing history with future CV or DB workers.
+- Space to add local resources (SQLite, computer-vision polling, stream overlays) without bloating the UI bundle.
+
+You can still run the browser-only flow, but the recommended development loop is to let Tauri spawn the frontend dev server and operate the app within the native window.
 
 ---
 
@@ -123,6 +139,15 @@ Open:
 http://localhost:5173/
 ```
 
+### 5. Launch the desktop shell
+
+```bash
+# from the repo root
+cargo tauri dev
+```
+
+This runs the frontend dev server (via `npm run dev`), boots Tauri, and wires the React UI to the new backend commands. To create a distributable desktop binary, run `cargo tauri build`.
+
 ---
 
 ## How the WASM Shuffle Works
@@ -142,6 +167,34 @@ pub fn shuffled_indices(len: usize, seed: u32) -> Vec<u32> {
 - The Rust function returns a permutation of 0..N.
 - JS uses this to reorder portrait indices.
 - Shuffles are independent for each panel.
+
+The Tauri backend links against the same crate, so desktop commands and WASM stay in sync.
+
+---
+
+## Rust Backend Commands (Tauri)
+
+The desktop shell exposes a few IPC commands inside `src-tauri/src/lib.rs` that the UI (or future automation workers) can invoke:
+
+```
+```1:107:src-tauri/src/lib.rs
+#[tauri::command]
+fn start_run(characters: Vec<String>, seed: Option<u32>, state: State<SharedRunState>) -> RunState { /* ... */ }
+
+#[tauri::command]
+fn complete_character(character: Option<String>, state: State<SharedRunState>) -> RunState { /* ... */ }
+
+#[tauri::command]
+fn fail_run(state: State<SharedRunState>) -> RunState { /* ... */ }
+```
+```
+
+- `shuffle_characters`: produce RNG-stable orderings directly from Rust.
+- `start_run`: persist queue/metadata for a new Iron Man attempt.
+- `complete_character`: remove the head (or named entry) from the queue and append it to the completed list.
+- `fail_run`, `reset_run`, `get_run_state`: manage lifecycle and surface the latest snapshot to the UI.
+
+Because the state lives in Rust, it's ready for enhancements like local persistence, auto-tracking via computer vision, or emitting overlay events without rewriting frontend logic.
 
 ---
 
