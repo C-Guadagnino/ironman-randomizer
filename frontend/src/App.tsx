@@ -1,25 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import init from './pkg/portrait_shuffler';
 import { PORTRAITS } from './assets/portrait-constnats';
 import PortraitShuffler from './components/portrait-shuffler';
 
 const BREAKPOINT = 1120; // px; adjust as you like
 
 const App: React.FC = () => {
-  const [wasmReady, setWasmReady] = useState<boolean>(false);
   const [isVertical, setIsVertical] = useState<boolean>(false);
-
-  //	Initialize the WASM module once when the app mounts.
-  useEffect(() => {
-    (async () => {
-      try {
-        await init();
-        setWasmReady(true);
-      } catch (err) {
-        console.error('WASM init failed', err);
-      }
-    })();
-  }, []);
 
   //	Track window size to switch between horizontal / vertical layout.
   useEffect(() => {
@@ -84,7 +70,6 @@ const App: React.FC = () => {
           <PortraitShuffler
             title="Player 1"
             portraits={PORTRAITS}
-            wasmReady={wasmReady}
           />
         </div>
 
@@ -100,7 +85,6 @@ const App: React.FC = () => {
           <PortraitShuffler
             title="Player 2"
             portraits={PORTRAITS}
-            wasmReady={wasmReady}
           />
         </div>
       </div>

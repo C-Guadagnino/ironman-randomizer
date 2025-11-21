@@ -1,11 +1,10 @@
 //	src/components/portrait-shuffler.tsx
 import React, { useState } from 'react';
-import { shuffled_indices } from '../pkg/portrait_shuffler';
+import { invoke } from '@tauri-apps/api/core';
 
 type PortraitShufflerProps = {
   title: string;
   portraits: string[];
-  wasmReady: boolean;
 };
 
 const ROW_SIZES = [5, 4, 3, 2];
@@ -13,7 +12,6 @@ const ROW_SIZES = [5, 4, 3, 2];
 const PortraitShuffler: React.FC<PortraitShufflerProps> = ({
   title,
   portraits,
-  wasmReady,
 }) => {
   const [order, setOrder] = useState<number[]>(() =>
     portraits.map((_, index) => index)
@@ -25,18 +23,23 @@ const PortraitShuffler: React.FC<PortraitShufflerProps> = ({
     portraits.map(() => false)
   );
 
-  const handleShuffleClick = () => {
-    if (!wasmReady || portraits.length === 0) {
+  const handleShuffleClick = async () => {
+    if (portraits.length === 0) {
       return;
     }
 
     setPreviousOrder(order);
 
     const seed: number = Date.now() >>> 0;
-    const indices = shuffled_indices(portraits.length, seed);
-    const arr: number[] = Array.from(indices as ArrayLike<number>);
-
-    setOrder(arr);
+    try {
+      const indices = await invoke<number[]>('shuffle_characters', {
+        len: portraits.length,
+        seed: seed,
+      });
+      setOrder(indices);
+    } catch (err) {
+      console.error('Failed to shuffle:', err);
+    }
   };
 
   const handleUndoClick = () => {
@@ -102,14 +105,13 @@ const PortraitShuffler: React.FC<PortraitShufflerProps> = ({
         <button
           type="button"
           onClick={handleShuffleClick}
-          disabled={!wasmReady}
           style={{
             padding: '8px 16px',
             fontSize: '16px',
-            cursor: wasmReady ? 'pointer' : 'default',
+            cursor: 'pointer',
           }}
         >
-          {!wasmReady ? 'Randomize (Loading WASM...)' : 'Randomize'}
+          Randomize
         </button>
 
         <button
