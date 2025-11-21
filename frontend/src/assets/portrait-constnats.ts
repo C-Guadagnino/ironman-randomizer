@@ -1,0 +1,16 @@
+export const PORTRAITS: string[] = [
+  '/portraits/240px-RoA2_Icon_AbsaStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_ClairenStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_EtalusStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_FleetStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_ForsburnStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_GalvanStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_KraggStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_LoxodontStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_MaypulStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_OlympiaStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_OrcaneStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_WrastorStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_ZetterburnStockIcon.webp',
+  '/portraits/240px-RoA2_Icon_RannoStockIcon.webp',
+];
